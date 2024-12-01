@@ -10,19 +10,33 @@ const Forecast = () => {
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [monthsError, setMonthsError] = useState('');  // To hold error message for months input
+  const [monthsError, setMonthsError] = useState('');
+  const [fileError, setFileError] = useState('');
 
   // Handle CSV file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      if (file.type !== 'text/csv') {
+        setFileError('Invalid file type. Please upload a CSV file.');
+        return;
+      } else {
+        setFileError('');
+      }
+
       Papa.parse(file, {
         complete: (result) => {
           const processedData = preprocessData(result.data);
-          setData(processedData);
+          if (processedData.length === 0) {
+            setFileError('No valid data found in the CSV file.');
+          } else {
+            setData(processedData);
+          }
         },
         header: true,
       });
+    } else {
+      setFileError('No file selected.');
     }
   };
 
@@ -58,30 +72,41 @@ const Forecast = () => {
 
   // Function to predict sales for a specific product
   const predictSalesForProduct = async (productData) => {
-    const { xs, ys } = prepareData(productData);
+    try {
+      const { xs, ys } = prepareData(productData);
 
-    const model = tf.sequential();
-    model.add(tf.layers.dense({ units: 64, inputShape: [2], activation: 'relu' }));
-    model.add(tf.layers.dense({ units: 1 }));
+      const model = tf.sequential();
+      model.add(tf.layers.dense({ units: 64, inputShape: [2], activation: 'relu' }));
+      model.add(tf.layers.dense({ units: 1 }));
 
-    model.compile({ optimizer: tf.train.adam(0.01), loss: 'meanSquaredError' });
+      model.compile({ optimizer: tf.train.adam(0.01), loss: 'meanSquaredError' });
 
-    await model.fit(xs, ys, { epochs: 100 });
+      await model.fit(xs, ys, { epochs: 10 });
 
-    const predictions = [];
-    const lastMonth = productData[productData.length - 1].month;
+      const predictions = [];
+      const lastMonth = productData[productData.length - 1].month;
 
-    for (let i = 1; i <= months; i++) {
-      const inputTensor = tf.tensor2d([[lastMonth + i, productData.length]]);
-      const predictedQuantity = model.predict(inputTensor).dataSync()[0];
-      predictions.push({ month: lastMonth + i, predicted: predictedQuantity });
+      for (let i = 1; i <= months; i++) {
+        const inputTensor = tf.tensor2d([[lastMonth + i, productData.length]]);
+        const predictedQuantity = model.predict(inputTensor).dataSync()[0];
+        predictions.push({ month: lastMonth + i, predicted: predictedQuantity });
+      }
+
+      return predictions;
+    } catch (error) {
+      setFileError('Error during model training or prediction: ' + error.message);
+      console.error(error);
+      return [];
     }
-
-    return predictions;
   };
 
   // Function to predict sales for all products
   const predictSales = async () => {
+    if (!data || data.length === 0) {
+      setFileError('Please upload a CSV file first.');
+      return;
+    }
+
     if (months <= 0) {
       setMonthsError('Please enter a positive number for months.');
       return;
@@ -98,7 +123,7 @@ const Forecast = () => {
       const filteredData = data.filter((entry) => entry.product === product);
 
       if (filteredData.length === 0) {
-        alert(`No data found for the product: ${product}`);
+        setFileError(`No data found for the product: ${product}`);
         continue;
       }
 
@@ -158,10 +183,10 @@ const Forecast = () => {
 
       <div className="file-upload">
         <input type="file" accept=".csv" onChange={handleFileUpload} />
+        {fileError && <p style={{ color: 'red', fontSize: '14px' }}>{fileError}</p>}
       </div>
 
-      {/* Dynamic months input with improved design */}
-      {/* <div className="months-selector">
+      <div className="months-selector">
         <label htmlFor="months">Number of months to predict: </label>
         <input
           type="number"
@@ -177,7 +202,7 @@ const Forecast = () => {
           style={{ padding: '8px', fontSize: '16px', width: '120px', marginBottom: '10px' }}
         />
         {monthsError && <p style={{ color: 'red', fontSize: '14px' }}>{monthsError}</p>}
-      </div> */}
+      </div>
 
       <button onClick={predictSales} disabled={loading} style={{ padding: '10px 20px', fontSize: '16px' }}>
         Predict Sales
