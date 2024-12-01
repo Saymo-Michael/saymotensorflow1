@@ -1,0 +1,135 @@
+/* Forecast.css */
+
+/* Basic reset and global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* Main container for the forecast */
+.forecast-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Title styling */
+h1 {
+  font-size: 28px;
+  color: #0078D4; /* Messenger blue color */
+  margin-bottom: 20px;
+}
+
+/* Product selector styles */
+.product-selector {
+  margin-bottom: 20px;
+}
+
+.product-selector label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+}
+
+.product-selector select {
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 8px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.product-selector select:focus {
+  border-color: #0078D4;
+}
+
+/* File upload input */
+.file-upload {
+  margin-bottom: 20px;
+}
+
+.file-upload input {
+  font-size: 16px;
+  padding: 10px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  display: inline-block;
+}
+
+.file-upload input[type="file"] {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.file-upload input[type="file"]:hover {
+  background-color: #f0f0f0;
+}
+
+/* Button styling */
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #0078D4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #005a8c;
+}
+
+button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Loading text */
+.loading {
+  font-size: 16px;
+  color: #888;
+  margin-top: 20px;
+}
+
+/* Sales forecast title */
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 20px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 768px) {
+  .forecast-container {
+    padding: 15px;
+  }
+
+  .product-selector select {
+    width: 100%;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px 0;
+  }
+}

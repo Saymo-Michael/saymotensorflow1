@@ -1,0 +1,75 @@
+import React, { useState } from 'react';
+import Papa from 'papaparse';
+import './Forecast.css';
+
+const Forecast = () => {
+  const [data, setData] = useState([]);
+  const [months, setMonths] = useState(6); 
+  const [prediction, setPrediction] = useState(null);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        complete: (result) => {
+          setData(result.data);
+        },
+        header: true, // Treats the first row as headers
+      });
+    }
+  };
+
+  const handleMonthChange = (event) => {
+    setMonths(event.target.value);
+  };
+
+  return (
+    <div className="forecast-container">
+      <div className="forecast-settings">
+        <label htmlFor="months">Forecast Months: </label>
+        <input
+          type="number"
+          id="months"
+          value={months}
+          min="1"
+          max="12"
+          onChange={handleMonthChange}
+        />
+      </div>
+
+      <div className="file-upload">
+        <input type="file" accept=".csv" onChange={handleFileUpload} />
+      </div>
+
+      {data.length > 0 && (
+        <div className="data-display">
+          <h2>Uploaded Data</h2>
+          <div className="scrollable-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Barcode</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Total Sold</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{entry.barcode}</td>
+                    <td>{entry.created}</td>
+                    <td>{entry.short_desc}</td>
+                    <td>{entry.total_sold}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* You can add your chart component here */}
+    </div>
+  );
+};
